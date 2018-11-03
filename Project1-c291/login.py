@@ -35,30 +35,32 @@ def logIn(dbName):
     
     if emailInput.lower() == 'back':
         loginMenu(dbName)
+    
     elif not re.match(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$', emailInput):
         print('\nInvalid Input')
         logIn(dbName)
     
-    password = getpass.getpass('Password: ')
-    c.execute('''SELECT * 
-        FROM members
-        WHERE email LIKE :email
-        AND pwd=:pwd;''', 
-        {"email": emailInput, 'pwd': password})
-    fetchResult = c.fetchall()
-    conn.commit()
-    conn.close()
-
-    if len(fetchResult) == 0:
-        print('\nUsername or Password is incorrect')
-        logIn(dbName)
-    elif len(fetchResult) == 1:
-        print('\nWelcome ' + fetchResult[0][1])
-        from menu import mainMenu
-        mainMenu(dbName,emailInput)
     else:
-        print('Something went wrong, please try again')
-        loginMenu(dbName)
+        password = getpass.getpass('Password: ')
+        c.execute('''SELECT * 
+            FROM members
+            WHERE email LIKE :email
+            AND pwd=:pwd;''', 
+            {"email": emailInput, 'pwd': password})
+        fetchResult = c.fetchall()
+        conn.commit()
+        conn.close()
+
+        if not fetchResult:
+            print('\nUsername or Password is incorrect')
+            logIn(dbName)
+        elif len(fetchResult) == 1:
+            print('\nWelcome ' + fetchResult[0][1])
+            from menu import mainMenu
+            mainMenu(dbName,emailInput)
+        else:
+            print('Something went wrong, please try again')
+            loginMenu(dbName)
 
 
 #signup
@@ -72,7 +74,7 @@ def signUp(dbName):
         loginMenu(dbName)
 
     elif not re.match(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+$', email) or len(email) > 15:
-        print('Invalid Input')
+        print('\nInvalid Input')
         signUp(dbName)
 
     c.execute('''SELECT *
@@ -81,34 +83,37 @@ def signUp(dbName):
         {"email": email})
     fetchResult = c.fetchall()
         
-    #the signup if email wasn't in use
-    if len(fetchResult) == 0:
-        print('\nEmail is available, please fill the rest of the forum')
+    #signup form if email wasn't in use
+    if not fetchResult:
+        print('\nEmail is available, please fill the rest of the form')
         print('Email: ' + email)
-        password = getpass.getpass('Password max 6 char: ')
-        name = input('Full Name: ')
-        phone = input('Phone number: ')
+        name= ''
+        password=''
+        passwordConf = ''
+        phone=''
 
-        while len(password) > 6 or len(password) ==0:
-            print('\nInvalid Password, try again')
+        while password != passwordConf or len(password) > 6 or len(password) == 0:
+            password=''
+            passwordConf = ''
             password = getpass.getpass('Password max 6 char: ')
-        
-        while len(name) > 20:
-            print('\nName is too long, try again')
-            name = input('Full Name: ')
+            passwordConf = getpass.getpass('Confrim Password: ')
+     
+        while len(name) > 20 or len(name) == 0:
+            name = input('Full Name max 20 char: ')
 
-        while len(phone) > 12:
-            print('\nPhone number is too long, please try again')
-            phone = input('Phone Number: ')
+        while not phone.isdigit() or len(phone) > 12 or len(phone) == 0:
+            phone = input('Phone number max 12 digits: ')
 
-        print('Confirm Your Information')
-        print('\nEmail: ' + email)
+        print('\nConfirm Your Information')
+        print('Email: ' + email)
         print('Name: ' + name)
         print('Phone: ' + phone)
         print('Confirm y|n')
-        confirmResponse = input()
-
-        if confirmResponse.lower() == 'y':
+        res=''
+        while res.lower() != 'y' and res.lower() != 'n':
+            res = input()
+        
+        if res.lower() == 'y':
             signUpInfo = [email,name,phone,password]
             c = conn.cursor()
             c.execute(' PRAGMA foreign_keys=ON; ')
@@ -120,12 +125,7 @@ def signUp(dbName):
             print("You've successfully signed up! Please Login")
             loginMenu(dbName)
         
-        elif confirmResponse.lower() == 'n':
-            conn.commit()
-            conn.close()
-            signUp(dbName)
-        else:
-            print('Invald Input, restarting')
+        elif res.lower() == 'n':
             conn.commit()
             conn.close()
             signUp(dbName)

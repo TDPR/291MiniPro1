@@ -52,4 +52,4 @@ def getMessages(dbName, email):
             print('From: ' + x[2])
             print('Message: ' + x[3])
     else:
-       print('\nNo New Messages') 
+       print('\nNo New Messages')
