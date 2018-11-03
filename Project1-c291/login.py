@@ -27,9 +27,6 @@ def loginMenu(dbName):
 
 #logIn
 def logIn(dbName):
-    conn = sqlite3.connect(dbName)
-    c = conn.cursor()
-    c.execute(' PRAGMA foreign_keys=ON; ') 
     print('\nLog In\nEnter your email or Back to go back')
     emailInput = input('Email: ')
     
@@ -40,7 +37,11 @@ def logIn(dbName):
         print('\nInvalid Input')
         logIn(dbName)
     
+    #log in attempt
     else:
+        conn = sqlite3.connect(dbName)
+        c = conn.cursor()
+        c.execute(' PRAGMA foreign_keys=ON; ') 
         password = getpass.getpass('Password: ')
         c.execute('''SELECT * 
             FROM members
@@ -50,14 +51,17 @@ def logIn(dbName):
         fetchResult = c.fetchall()
         conn.commit()
         conn.close()
-
+        
+        #login attempt pathing
         if not fetchResult:
             print('\nUsername or Password is incorrect')
             logIn(dbName)
+        
         elif len(fetchResult) == 1:
             print('\nWelcome ' + fetchResult[0][1])
             from menu import mainMenu
             mainMenu(dbName,emailInput)
+        
         else:
             print('Something went wrong, please try again')
             loginMenu(dbName)
@@ -85,12 +89,12 @@ def signUp(dbName):
         
     #signup form if email wasn't in use
     if not fetchResult:
-        print('\nEmail is available, please fill the rest of the form')
-        print('Email: ' + email)
         name= ''
         password=''
         passwordConf = ''
         phone=''
+        print('\nEmail is available, please fill the rest of the form')
+        print('Email: ' + email)
 
         while password != passwordConf or len(password) > 6 or len(password) == 0:
             password=''
@@ -110,13 +114,13 @@ def signUp(dbName):
         print('Phone: ' + phone)
         print('Confirm y|n')
         res=''
+        
         while res.lower() != 'y' and res.lower() != 'n':
             res = input()
         
+        #sign up confirm
         if res.lower() == 'y':
             signUpInfo = [email,name,phone,password]
-            c = conn.cursor()
-            c.execute(' PRAGMA foreign_keys=ON; ')
             c.execute('''INSERT INTO members(email,name,phone,pwd)
                 VALUES (?,?,?,?);''',
                 signUpInfo) 

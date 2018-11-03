@@ -25,7 +25,7 @@ def bookingMenu(dbName, email):
         mainMenu(dbName,email)
 
     else:
-        print('Invalid Input\n')
+        print('\nInvalid Input')
         bookingMenu(dbName,email)
 
 def listBookings(dbName,email):
@@ -94,8 +94,6 @@ def cancelBookings(dbName,email):
                 cancelMsg = [bookings[1],datetime.datetime.now().date(),email,
                     'Your driver has cancelled the booking with BNO: ' + str(bookings[0]), bookings[6], 'n']
 
-                c = conn.cursor()
-                c.execute(' PRAGMA foreign_keys=ON; ')
                 #TODO fix this query search doesn't work just yet
                 c.execute('''DELETE
                     FROM bookings
@@ -105,7 +103,7 @@ def cancelBookings(dbName,email):
                         AND r.driver LIKE :email
                         AND b.bno = :bno); ''', 
                     {"email": email, "bno": bno})
-                print('Hello World')
+                
                 c.execute('''INSERT 
                     INTO inbox(email,msgTimestamp,sender,content,rno,seen)
                     VALUES (?,?,?,?,?,?);''',
