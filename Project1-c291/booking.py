@@ -55,17 +55,17 @@ def cancelBookings(dbName,email):
     print('Enter the BNO of the booking you want to cancel')
     print('Type List to list your bookings')
     print('Type Back to return to Booking Menu')
-    res = input()
+    bno = input()
 
-    if res.lower() == 'list':
+    if bno.lower() == 'list':
         listBookings(dbName,email)
         cancelBookings(dbName,email)
 
-    elif res.lower() == 'back':
+    elif bno.lower() == 'back':
         bookingMenu(dbName,email)
 
     #cancel func
-    elif res.isdigit():
+    elif bno.isdigit():
         conn = sqlite3.connect(dbName)
         c = conn.cursor()
         c.execute(' PRAGMA foreign_keys=ON; ')
@@ -74,7 +74,7 @@ def cancelBookings(dbName,email):
             WHERE b.rno = r.rno
             AND r.driver LIKE :email
             AND b.bno = :bno; ''', 
-            {"email": email, "bno": res})
+            {"email": email, "bno": bno})
         bookings = c.fetchone()
         
         #bno exists
@@ -104,7 +104,7 @@ def cancelBookings(dbName,email):
                         WHERE b.rno = r.rno
                         AND r.driver LIKE :email
                         AND b.bno = :bno); ''', 
-                    {"email": email, "bno": res})
+                    {"email": email, "bno": bno})
                 print('Hello World')
                 c.execute('''INSERT 
                     INTO inbox(email,msgTimestamp,sender,content,rno,seen)
