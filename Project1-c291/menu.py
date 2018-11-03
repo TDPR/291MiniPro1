@@ -11,10 +11,23 @@ def mainMenu(dbName, email):
     print('5. Search and delete ride requests')
     print('6. Log Out')
     res = input()
-    if res == '6':
+
+    if res == '1':
+        mainMenu(dbName, email)
+
+    elif res == '3':
+        print('\nBooking Menu')
+        from booking import bookingMenu
+        bookingMenu(dbName, email)
+
+    elif res == '6':
         print('Logging Out')
         from login import loginMenu
         loginMenu(dbName)
+
+    else:
+        print('Invalid Input')
+        mainMenu(dbName, email)
 
 def getMessages(dbName, email):
     conn = sqlite3.connect(dbName)

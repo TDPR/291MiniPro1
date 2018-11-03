@@ -101,6 +101,7 @@ def signUp(dbName):
             print('\nPhone number is too long, please try again')
             phone = input('Phone Number: ')
 
+        print('Confirm Your Information')
         print('\nEmail: ' + email)
         print('Name: ' + name)
         print('Phone: ' + phone)
@@ -113,7 +114,7 @@ def signUp(dbName):
             c.execute(' PRAGMA foreign_keys=ON; ')
             c.execute('''INSERT INTO members(email,name,phone,pwd)
                 VALUES (?,?,?,?);''',
-            signUpInfo) 
+                signUpInfo) 
             conn.commit()
             conn.close()
             print("You've successfully signed up! Please Login")
