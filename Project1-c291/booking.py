@@ -147,19 +147,18 @@ def bookMembers(dbName,email):
             WHERE driver LIKE :email
             AND rno=:rno;''', 
             {"email": email, "rno": rno})
-        rideList = c.fetchall()
+        rnoMatch = c.fetchone()
 
-        if rideList:
-            #TODO FIX this 
+        if rnoMatch:
             for x in ridesUnique:
-                if rides == x[0]:
-                    rideInfo = x
-                    print('RNO: ' + str(x[0]))
+                if rnoMatch[0] == x[0]:
+                    rideMatch = x
+                    print('\nRNO: ' + str(x[0]))
                     availSeats = int(x[1] or 0) - int(x[2] or 0)
                     if availSeats < 0:
                         availSeats = 'Overbooked by ' + abs(availSeats)
                     print('Available Seats: ' + str(availSeats))
-                    print('BNO: ' + str(x[3]) + '\n')
+                    print('BNO: ' + str(x[3]))
 
             print('Confirm you want to add to this ride: y|n')
             res=''
@@ -167,11 +166,12 @@ def bookMembers(dbName,email):
             while res.lower() != 'y' and res.lower() != 'n':
                 res=input()
 
+            #form fill
             if res.lower() == 'y':
                 memEmail = ''
-                seatBooked = 0
+                seatBooked = '0'
                 cost = ''
-                print('Fill the rest of form: ')
+                print('\nFill the rest of form: ')
                 while not memEmail:
                     memEmail = input('Email of member you wish to book: ')
                     c.execute('''
@@ -180,19 +180,19 @@ def bookMembers(dbName,email):
                         WHERE email LIKE :email;''', 
                         {"email": memEmail})
                     verifyEmail = c.fetchone()
-                    if memEmail != verifyEmail:
+                    if not verifyEmail:
                         print('\nNo nember with that email exists')
                         memEmail=''
                 
-                while seatBooked == 0:
+                while seatBooked == '0':
                     seatBooked = input('Please enter how many seats you wish to book: ')
                     
-                    if seatBooked == 0:
+                    if seatBooked == '0':
                         print('\nPlease book at least one seat')
                     elif seatBooked.isdigit():
-                        ridesUnique[rideInfo][2] += seatBooked
-                        if ridesUnique[rideInfo][1] - ridesUnique[rideInfo][2] < 0:
-                            print("You're overbooked by " + str(abs(ridesUnique[rideInfo][1] - ridesUnique[rideInfo][2])))
+                        rideMatch[2] += int(seatBooked)
+                        if rideMatch[1] - rideMatch[2] < 0:
+                            print("You're overbooked by " + str(abs(rideMatch[1] - rideMatch[2])))
                             print('Please Confirm y|n')
                             res=''
 
@@ -200,32 +200,64 @@ def bookMembers(dbName,email):
                                 res=input()
 
                             if res.lower() == 'n':
-                                ridesUnique[rideInfo][2] -= seatBooked
-                                seatBooked = 0
+                                rideMatch[2] -= int(seatBooked)
+                                seatBooked = '0'
                     else:
                         print('\nPlease Enter a number')
+                        seatBooked = '0'
                 
                 while not cost.isdigit():
-                    cost = input('Enter the cost per seat')
+                    cost = input('Enter the cost per seat: ')
 
                 #potential alphanumeric check here
                 pickUp = input('Enter the pick up location: ')
                 dropOff = input('Enter the drop off location: ')
 
                 print('\nConfirm Details for booking')
-                print('BNO: ' + str(ridesUnique[rideInfo][0]))
-                print('Rider: ' + memEmail + ' | Cost: ' + str(cost) + ' | Seats Booked: ' + str(seatBooked))
-                print('Pick up: ' + pickUp + ' | Drop off: ' + dropOff + '\n')
+                print('RNO: ' + str(rideMatch[0]))
+                print('Rider: ' + memEmail + ' | Cost: ' + cost + ' | Seats Booked: ' + seatBooked)
+                print('Pick up: ' + pickUp + ' | Drop off: ' + dropOff)
                 print('Confim y|n')
                 res=''
 
                 while res.lower() != 'y' and res.lower() != 'n':
                     res=input()
+                
+                #CONFIRM BOOKING
+                if res.lower() == 'y':
+                    c.execute( '''
+                        SELECT MAX(bno)
+                        FROM bookings;''')
+                    bnoMax = c.fetchone()
+                    bnoMax = bnoMax[0] + 1    
+    
+                    addBooking=[bnoMax, memEmail, rideMatch[0], int(cost), int(seatBooked), pickUp, dropOff]
+                    bookMsg = [memEmail,datetime.datetime.now().date(),email,
+                        'Your driver has booked you to BNO: ' + str(bnoMax), rideMatch[0], 'n']
 
-                #TODO add the rest of the function
+                    c.execute('''INSERT 
+                        INTO bookings(bno,email,rno,cost,seats,pickup,dropoff)
+                        VALUES (?,?,?,?,?,?,?);''',
+                        addBooking)
+
+                    c.execute('''INSERT 
+                        INTO inbox(email,msgTimestamp,sender,content,rno,seen)
+                        VALUES (?,?,?,?,?,?);''',
+                        bookMsg)
+
+                    print("\nYou've succesfully booked " + memEmail + 'to RNO:' + str(rideMatch[0]) + 'with BNO: ' +str(bnoMax))
+                    conn.commit()
+                    conn.close()
+                    bookMembers(dbName,email)
+
+                else:
+                    conn.commit()
+                    conn.close()
+                    bookMembers(dbName,email)
 
             else:
-                print('\n')
+                conn.commit()
+                conn.close()
                 bookMembers(dbName,email)
 
         else:
