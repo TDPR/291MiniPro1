@@ -1,7 +1,7 @@
 
 import sqlite3
 import datetime
-conn = sqlite3.connect(dbname)
+conn = sqlite3.connect(dbName)
 c = conn.cursor()
 c.execute('PRAGMA foreign_keys=ON;')
 
@@ -114,7 +114,7 @@ def insertRequest(rid, email, rdate, pickup, dropoff, amount):
 
 
 #This is the Post Ride Requests Primary Function
-def postRideRequest(email):
+def postRideRequest(dbName, email):
     
     print('Welcome to ride requests. Please input information about the ride you are requesting: ')
 #will ask for rdate and check to ensure string is date format
