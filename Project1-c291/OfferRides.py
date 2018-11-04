@@ -1,12 +1,7 @@
-'''
-Created on Oct 28, 2018
-
-@author: Mike
-'''
 
 import sqlite3
 import datetime
-conn = sqlite3.connect('C:/SQLite/t.db')
+conn = sqlite3.connect(dbName)
 c = conn.cursor()
 c.execute('PRAGMA foreign_keys=ON;')
 
@@ -170,7 +165,7 @@ def insertEnroute(rno, lcode):
 
 #This is the primary ride offer function. Here members are prompted to insert information about their ride
 #This function calls all of the helper functions associated with ride info
-def rideInfo(email):
+def rideInfo(dbName, email):
     global conn, c
     
     rdate = dateCheck()
