@@ -24,7 +24,7 @@ def mainMenu(dbName, email):
         
     elif res == '4':
         print ('Post a ride request')
-        from postRideReq import postRideRequest
+        from postRideReqs import postRideRequest
         postRideRequest(dbName, email)
         
     elif res == '6':
@@ -56,7 +56,7 @@ def getMessages(dbName, email):
     if inbox:
         print('\nNew Messages:')
         for x in inbox:
-            print('From: ' + x[2])
+            print('From: ' + x[2] + ' | Sent: ' + x[1])
             print('Message: ' + x[3])
     else:
        print('\nNo New Messages')

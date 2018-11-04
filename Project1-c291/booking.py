@@ -14,7 +14,8 @@ def bookingMenu(dbName, email):
         bookingMenu(dbName,email)
     
     elif res == '2':
-        print('2')
+        print('\nBooking')
+        bookMembers(dbName,email)
     
     elif res == '3':
         print('\nCancelling')
@@ -32,7 +33,7 @@ def listBookings(dbName,email):
     conn = sqlite3.connect(dbName)
     c = conn.cursor()
     c.execute(' PRAGMA foreign_keys=ON; ')
-    c.execute('''SELECT b.bno, b.email, b.cost, b. seats, b.pickup, b.dropoff 
+    c.execute('''SELECT b.bno, b.email, b.cost, b.seats, b.pickup, b.dropoff 
         FROM bookings b, rides r
         WHERE b.rno = r.rno
         AND r.driver LIKE :email; ''', 
@@ -40,7 +41,6 @@ def listBookings(dbName,email):
     bookings = c.fetchall()
     conn.commit()
     conn.close()
-    print(bookings)
     print('\nHere are your bookings')
     for x in bookings:
         print('BNO: ' + str(x[0]))
@@ -48,8 +48,196 @@ def listBookings(dbName,email):
         print('Pick up: ' + str(x[4]) + ' | Drop off: ' + str(x[5]) + '\n')
     return
 
-def bookMembers(dbName,email):
+def listRides(dbName,email, rides):
+    if rides:
+        print('\nHere are your rides')
+        listSize = 5 if len(rides) > 5 else len(rides)
+        for x in range(0,listSize):
+            print('RNO: ' + str(rides[x][0]))
+            availSeats = int(rides[x][1] or 0) - int(rides[x][2] or 0)
+            if availSeats < 0:
+                availSeats = 'Overbooked by ' + abs(availSeats)
+            print('Available Seats: ' + str(availSeats))
+            print('BNO: ' + str(rides[x][3]) + '\n')
+
+        #prints the rest if there is more
+        if len(rides) > 5:
+            print('Would you like to list the rest? y|n')
+            res = ''
+
+            while res.lower() != 'y' and res.lower() != 'n':
+                res = input()
+
+            if res.lower() == 'y':
+                print('\n')
+                for x in range(5,len(rides)):
+                    print('RNO: ' + str(rides[x][0]))
+                    availSeats = int(rides[x][1] or 0) - int(rides[x][2] or 0)
+                    if availSeats < 0:
+                        availSeats = 'Overbooked by ' + abs(availSeats)
+                    print('Available Seats: ' + str(availSeats))
+                    print('BNO: ' + str(rides[x][3]) + '\n')
+            else:
+                print('\n')
+    else:
+        print('\nYou have no rides')
     return
+
+def bookMembers(dbName,email):
+    conn = sqlite3.connect(dbName)
+    c = conn.cursor()
+    c.execute(' PRAGMA foreign_keys=ON; ')
+    c.execute('''
+        SELECT r.rno, r.seats, b.seats, b.bno
+        FROM rides r
+        LEFT JOIN bookings b
+        ON r.rno = b.rno
+        WHERE r.driver LIKE :email;''', 
+        {"email": email})
+    rides = c.fetchall()
+    conn.commit()
+    conn.close()
+
+    #ok this is probably the ugliest code I've written in a while
+    #it works and does what you want but there has to be an easier way
+    #if a TA comes and sees this please email me an easier way to do this
+    #at maoued@ualberta.ca
+    #called in this function rather than listRides because
+    #available seats are needed in book members
+    #this code makes rides a list of lists instead of list of tuples
+    #then it adds those lists to ridesUnique if rno is unique
+    #if it is not then it adds seats and joins BNO together
+    rides = [list(i) for i in rides]
+    if len(rides) > 1:
+        setRides = set()
+        ridesUnique = []
+        for sublist in rides:
+            rnoUnique = sublist[0]
+            if rnoUnique not in setRides:
+                ridesUnique.append(sublist)
+                setRides.add(rnoUnique)
+            else:
+                for i in ridesUnique:
+                    if rnoUnique == i[0]:
+                        i[2] = int(i[2] or 0) + int(sublist[2] or 0)
+                        i[3] = ', '.join([str(i[3]),str(sublist[3])])
+    else:
+        ridesUnique=rides
+
+    print('Enter the RNO of the ride you wish to book to')
+    print('Type List to list your rides')
+    print('Type Back to return to Booking Menu')
+    rno = input()
+
+    if rno.lower() == 'list':
+        listRides(dbName,email, ridesUnique)
+        bookMembers(dbName,email)
+
+    elif rno.lower() == 'back':
+        bookingMenu(dbName,email)
+
+    #booking member logic
+    elif rno.isdigit():
+        conn = sqlite3.connect(dbName)
+        c = conn.cursor()
+        c.execute(' PRAGMA foreign_keys=ON; ')
+        c.execute('''
+            SELECT rno
+            FROM rides
+            WHERE driver LIKE :email
+            AND rno=:rno;''', 
+            {"email": email, "rno": rno})
+        rideList = c.fetchall()
+
+        if rideList:
+            #TODO FIX this 
+            for x in ridesUnique:
+                if rides == x[0]:
+                    rideInfo = x
+                    print('RNO: ' + str(x[0]))
+                    availSeats = int(x[1] or 0) - int(x[2] or 0)
+                    if availSeats < 0:
+                        availSeats = 'Overbooked by ' + abs(availSeats)
+                    print('Available Seats: ' + str(availSeats))
+                    print('BNO: ' + str(x[3]) + '\n')
+
+            print('Confirm you want to add to this ride: y|n')
+            res=''
+
+            while res.lower() != 'y' and res.lower() != 'n':
+                res=input()
+
+            if res.lower() == 'y':
+                memEmail = ''
+                seatBooked = 0
+                cost = ''
+                print('Fill the rest of form: ')
+                while not memEmail:
+                    memEmail = input('Email of member you wish to book: ')
+                    c.execute('''
+                        SELECT email
+                        FROM members
+                        WHERE email LIKE :email;''', 
+                        {"email": memEmail})
+                    verifyEmail = c.fetchone()
+                    if memEmail != verifyEmail:
+                        print('\nNo nember with that email exists')
+                        memEmail=''
+                
+                while seatBooked == 0:
+                    seatBooked = input('Please enter how many seats you wish to book: ')
+                    
+                    if seatBooked == 0:
+                        print('\nPlease book at least one seat')
+                    elif seatBooked.isdigit():
+                        ridesUnique[rideInfo][2] += seatBooked
+                        if ridesUnique[rideInfo][1] - ridesUnique[rideInfo][2] < 0:
+                            print("You're overbooked by " + str(abs(ridesUnique[rideInfo][1] - ridesUnique[rideInfo][2])))
+                            print('Please Confirm y|n')
+                            res=''
+
+                            while res.lower() != 'y' and res.lower() != 'n':
+                                res=input()
+
+                            if res.lower() == 'n':
+                                ridesUnique[rideInfo][2] -= seatBooked
+                                seatBooked = 0
+                    else:
+                        print('\nPlease Enter a number')
+                
+                while not cost.isdigit():
+                    cost = input('Enter the cost per seat')
+
+                #potential alphanumeric check here
+                pickUp = input('Enter the pick up location: ')
+                dropOff = input('Enter the drop off location: ')
+
+                print('\nConfirm Details for booking')
+                print('BNO: ' + str(ridesUnique[rideInfo][0]))
+                print('Rider: ' + memEmail + ' | Cost: ' + str(cost) + ' | Seats Booked: ' + str(seatBooked))
+                print('Pick up: ' + pickUp + ' | Drop off: ' + dropOff + '\n')
+                print('Confim y|n')
+                res=''
+
+                while res.lower() != 'y' and res.lower() != 'n':
+                    res=input()
+
+                #TODO add the rest of the function
+
+            else:
+                print('\n')
+                bookMembers(dbName,email)
+
+        else:
+            conn.commit()
+            conn.close()
+            print('\nNo Matching Rides')
+            bookingMenu(dbName,email)
+        
+    
+    else:
+        print('\nInvalid Input')
+        bookMembers(dbName,email)
 
 def cancelBookings(dbName,email):
     print('Enter the BNO of the booking you want to cancel')
@@ -94,7 +282,6 @@ def cancelBookings(dbName,email):
                 cancelMsg = [bookings[1],datetime.datetime.now().date(),email,
                     'Your driver has cancelled the booking with BNO: ' + str(bookings[0]), bookings[6], 'n']
 
-                #TODO fix this query search doesn't work just yet
                 c.execute('''DELETE
                     FROM bookings
                     WHERE bno IN (SELECT b.bno
