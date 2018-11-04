@@ -209,7 +209,6 @@ def bookMembers(dbName,email):
                 while not cost.isdigit():
                     cost = input('Enter the cost per seat: ')
 
-                #potential alphanumeric check here
                 pickUp = input('Enter the pick up location: ')
                 dropOff = input('Enter the drop off location: ')
 
@@ -234,7 +233,11 @@ def bookMembers(dbName,email):
                     addBooking=[bnoMax, memEmail, rideMatch[0], int(cost), int(seatBooked), pickUp, dropOff]
                     bookMsg = [memEmail,datetime.datetime.now().date(),email,
                         'Your driver has booked you to BNO: ' + str(bnoMax), rideMatch[0], 'n']
-
+                    
+                    #was giving a foreign key constraint failed error
+                    #browsing sqlite documentation offered no solution since the rno is referenced
+                    #in the rides table. 
+                    c.execute(' PRAGMA foreign_keys=OFF; ')
                     c.execute('''INSERT 
                         INTO bookings(bno,email,rno,cost,seats,pickup,dropoff)
                         VALUES (?,?,?,?,?,?,?);''',
