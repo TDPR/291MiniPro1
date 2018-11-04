@@ -13,13 +13,20 @@ def mainMenu(dbName, email):
     res = input()
 
     if res == '1':
-        mainMenu(dbName, email)
+        print('Offer a ride')
+        from offerRides import rideInfo
+        rideInfo(dbName, email)
 
     elif res == '3':
         print('\nBooking Menu')
         from booking import bookingMenu
         bookingMenu(dbName, email)
-
+        
+    elif res == '4':
+        print ('Post a ride request')
+        from postRideReq import postRideRequest
+        postRideRequest(dbName, email)
+        
     elif res == '6':
         print('Logging Out')
         from login import loginMenu
