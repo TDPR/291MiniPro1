@@ -1,12 +1,10 @@
-
 import sqlite3
 import datetime
-conn = sqlite3.connect(dbName)
-c = conn.cursor()
-c.execute('PRAGMA foreign_keys=ON;')
+
 
 #This function checks date input to make sure it is in a valid YYYY-MM-DD date format
 def dateCheck():
+    
     for x in range (0, 3):
         rdate = input('When will the ride be? (YYYY-MM-DD): ')
         if (len(rdate.split('-')) < 3 or len(rdate.split('-')) > 3):
@@ -25,7 +23,10 @@ def dateCheck():
 
 ##This function generates a unique RNO for every ride offered
 def maxRno():
-    global conn, c
+    conn = sqlite3.connect('C:/SQLite/t.db')
+    c = conn.cursor()
+    c.execute('PRAGMA foreign_keys=ON;')
+   
     c.execute( '''
                 SELECT MAX(rno)
                 FROM rides;
@@ -38,7 +39,9 @@ def maxRno():
 #This function checks to make sure the car number entered is registered to the member offering a ride
 #It also checks seat number input and corrects seat input if member entered incorrectly
 def cnoMatch(carNum, email):
-    global conn, c
+    conn = sqlite3.connect('C:/SQLite/t.db')
+    c = conn.cursor()
+    c.execute('PRAGMA foreign_keys=ON;')
     
     c.execute('''
                         SELECT cno 
@@ -85,8 +88,11 @@ def cnoMatch(carNum, email):
 #This function allows members to search for lcode using keywords (city, prov, or address)
 #It also allows members to scroll through lcodes if there are more than 5 associated with the keyword
 def locationSearch():
-    global conn, c, offsetValue
+    conn = sqlite3.connect('C:/SQLite/t.db')
+    c = conn.cursor()
+    c.execute('PRAGMA foreign_keys=ON;')
     offsetValue = 0
+    
     loca = ""
     
     c.execute('''
@@ -137,7 +143,10 @@ def locationSearch():
 
 #This function enters ride information into the ride table
 def insertRides(rno, price, rdate, seats, lugDesc, src, dst, driver, cno):
-    global conn, c
+    conn = sqlite3.connect('C:/SQLite/t.db')
+    c = conn.cursor()
+    c.execute('PRAGMA foreign_keys=ON;')
+    
     #this SQL query enters ride information into the ride table  
     c.execute('''
                         INSERT INTO rides(rno, price, rdate, seats, lugDesc, src, dst, driver, cno)
@@ -151,7 +160,10 @@ def insertRides(rno, price, rdate, seats, lugDesc, src, dst, driver, cno):
 
 #This function enters enroute information into the ride table
 def insertEnroute(rno, lcode):
-    global conn, c
+    conn = sqlite3.connect('C:/SQLite/t.db')
+    c = conn.cursor()
+    c.execute('PRAGMA foreign_keys=ON;')
+    
     #this SQL query enters each of the enroute destinations as separate tuples into the table
     for each in lcode:      
         c.execute('''
@@ -165,8 +177,11 @@ def insertEnroute(rno, lcode):
 
 #This is the primary ride offer function. Here members are prompted to insert information about their ride
 #This function calls all of the helper functions associated with ride info
-def rideInfo(dbName, email):
-    global conn, c
+def rideInfo(email):
+    conn = sqlite3.connect('C:/SQLite/t.db')
+    c = conn.cursor()
+    c.execute('PRAGMA foreign_keys=ON;')
+
     
     rdate = dateCheck()
   
@@ -243,7 +258,7 @@ def rideInfo(dbName, email):
     conn.commit()
 
 
-    mainMenu()
+    mainMenu(dbName, email)
   
   
   
