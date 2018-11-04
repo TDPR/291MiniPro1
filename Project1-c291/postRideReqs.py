@@ -1,20 +1,15 @@
+'''
+Created on Nov 1, 2018
+
+@author: Mike
+'''
 
 import sqlite3
 import datetime
-conn = sqlite3.connect(dbName)
-c = conn.cursor()
-c.execute('PRAGMA foreign_keys=ON;')
 
-#===============================================================================
-# 
-# NOTE** This File Re-Uses some Functions from the 291MiniP1_OfferRides file
-#===============================================================================
 
-'''
-NOTE** Date Check is the same as the one in offer rides (you only need one for integration)
-'''
+#dateCheck function 
 def dateCheck():
-    global conn, c
     
     for x in range (0, 3):
         rdate = input('When will the ride be? (YYYY-MM-DD): ')
@@ -25,7 +20,7 @@ def dateCheck():
             print('You have ' + str(2-x) +' tries available. Or it will be left blank')
         else:
             try:
-                rdateCheck = datetime.datetime.strptime(rdate,'%Y-%m-%d')
+                datetime.datetime.strptime(rdate,'%Y-%m-%d')
                 break
             except ValueError:
                 print('The date format you entered is incorrect. Please enter date in YYYY-MM-DD format.')
@@ -33,8 +28,11 @@ def dateCheck():
     return rdate
 
 #This function generates a unique max rid for the each request made
-def maxRID():
-    global conn, c
+def maxRID(dbName):
+    conn = sqlite3.connect(dbName)
+    c = conn.cursor()
+    c.execute('PRAGMA foreign_keys=ON;')
+    
     c.execute( '''
                 SELECT MAX(rid)
                 FROM requests;
@@ -47,8 +45,11 @@ def maxRID():
 '''
 NOTE** location search is the same as the one in offer rides (you only need one for integration)
 '''
-def locationSearch():
-    global conn, c, offsetValue
+def locationSearch(dbName):
+    conn = sqlite3.connect(dbName)
+    c = conn.cursor()
+    c.execute('PRAGMA foreign_keys=ON;')
+    
     offsetValue = 0
     loca = ""
     
@@ -82,8 +83,8 @@ def locationSearch():
         if (check2,) in lcodeList:
             loca = check2
             print()
-            break
             False
+            break
         elif check2.lower() == 'next':
             offsetValue = offsetValue + 5
         elif check2.lower() == 'exit':
@@ -99,8 +100,11 @@ def locationSearch():
     return loca
 
 #Function to insert New Ride Request post into requests table
-def insertRequest(rid, email, rdate, pickup, dropoff, amount):
-    global conn, c
+def insertRequest(rid, email, rdate, pickup, dropoff, amount, dbName):
+    conn = sqlite3.connect(dbName)
+    c = conn.cursor()
+    c.execute('PRAGMA foreign_keys=ON;')
+    
     #this SQL query inserts ride information into the requests table  
     c.execute('''
                         INSERT INTO requests(rid, email, rdate, pickup, dropoff, amount)
@@ -115,23 +119,27 @@ def insertRequest(rid, email, rdate, pickup, dropoff, amount):
 
 #This is the Post Ride Requests Primary Function
 def postRideRequest(dbName, email):
+    from menu import mainMenu
+    conn = sqlite3.connect(dbName)
+    c = conn.cursor()
+    c.execute('PRAGMA foreign_keys=ON;')
     
     print('Welcome to ride requests. Please input information about the ride you are requesting: ')
 #will ask for rdate and check to ensure string is date format
     requestDate = dateCheck()
 #produces unique rno
-    requestRID = maxRID()
+    requestRID = maxRID(dbName)
 #finds pick up location using locationSearch func.
     print('Where would you like to be picked up?')
-    pickup = locationSearch()
+    pickup = locationSearch(dbName)
 #finds dropoff location using locationSearch func.
     print('Where would you like to be dropped off?')
-    dropoff = locationSearch()
+    dropoff = locationSearch(dbName)
 #member provides amount willing to pay
     amount = input('How much are you willing pay per seat?: ')
 #inserts information into requests table
-    insertRequest(requestRID, email, requestDate, pickup, dropoff, amount)
+    insertRequest(requestRID, email, requestDate, pickup, dropoff, amount, dbName)
     conn.commit()
     
-    mainMenu()
+    mainMenu(dbName, email)
     

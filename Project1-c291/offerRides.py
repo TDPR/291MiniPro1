@@ -14,7 +14,7 @@ def dateCheck():
             print('You have ' + str(2-x) +' tries available. Or it will be left blank')
         else:
             try:
-                rdateCheck = datetime.datetime.strptime(rdate,'%Y-%m-%d')
+                datetime.datetime.strptime(rdate,'%Y-%m-%d')
                 break
             except ValueError:
                 print('The date format you entered is incorrect. Please enter date in YYYY-MM-DD format.')
@@ -22,8 +22,8 @@ def dateCheck():
     return rdate
 
 ##This function generates a unique RNO for every ride offered
-def maxRno():
-    conn = sqlite3.connect('C:/SQLite/t.db')
+def maxRno(dbName):
+    conn = sqlite3.connect(dbName)
     c = conn.cursor()
     c.execute('PRAGMA foreign_keys=ON;')
    
@@ -38,8 +38,8 @@ def maxRno():
 
 #This function checks to make sure the car number entered is registered to the member offering a ride
 #It also checks seat number input and corrects seat input if member entered incorrectly
-def cnoMatch(carNum, email):
-    conn = sqlite3.connect('C:/SQLite/t.db')
+def cnoMatch(carNum, email, seats1, dbName):
+    conn = sqlite3.connect(dbName)
     c = conn.cursor()
     c.execute('PRAGMA foreign_keys=ON;')
     
@@ -47,7 +47,7 @@ def cnoMatch(carNum, email):
                         SELECT cno 
                         from cars
                             ''')
-    cnoList = c.fetchall()
+    c.fetchall()
     
     c.execute('''
                 SELECT cno, make, model, year, owner
@@ -82,13 +82,33 @@ def cnoMatch(carNum, email):
                             where cno = ? ''',[cno])
     seatsResult = c.fetchall()
     print('The correct number of seats in your car is: ', seatsResult[0][0])
-     
-    return cno, seatsResult
+    seatsCheck = seatsResult[0][0]
+    if seats1 < seatsCheck:
+        print('You have ' + str(seatsCheck-seats1) + ' seats still available.')
+        seatsAsk = input('Would you like to adjust the number of seats you are offering? (Y/N):')
+        if seatsAsk.startswith('n' or 'N'):
+            print('Your offered seats will not be adjusted.')
+            seatsSend = seats1
+        elif seatsAsk.startswith('y' or 'Y'):
+            seats1 = int(input('What is your seat number?: '))
+            while seats1 > seatsCheck:
+                print('The value you entered is too high. Please enter a number lower than ' + str(seatsResult[0][0]))
+                seats1 = int(input('What is your seat number?: '))
+
+    elif seats1 > seatsResult[0][0]:
+        while seats1 > seatsCheck:
+            print('You have entered ' + str(seats1) +'. The number of seats you have entered are more than the seats you have.')
+            seats1 = int(input('Please input a value less than or equal to ' + str(seatsResult[0][0]) + ': '))
+  
+    seatsSend = seats1
+    #cnoB, seatsSend = cnoMatch(cnoA, email, seats1)
+
+    return cno, seatsSend
 
 #This function allows members to search for lcode using keywords (city, prov, or address)
 #It also allows members to scroll through lcodes if there are more than 5 associated with the keyword
-def locationSearch():
-    conn = sqlite3.connect('C:/SQLite/t.db')
+def locationSearch(dbName):
+    conn = sqlite3.connect(dbName)
     c = conn.cursor()
     c.execute('PRAGMA foreign_keys=ON;')
     offsetValue = 0
@@ -124,9 +144,8 @@ def locationSearch():
     
         if (check2,) in lcodeList:
             loca = check2
-            print()
-            break
             False
+            break
         elif check2.lower() == 'next':
             offsetValue = offsetValue + 5
         elif check2.lower() == 'exit':
@@ -142,8 +161,8 @@ def locationSearch():
     return loca
 
 #This function enters ride information into the ride table
-def insertRides(rno, price, rdate, seats, lugDesc, src, dst, driver, cno):
-    conn = sqlite3.connect('C:/SQLite/t.db')
+def insertRides(rno, price, rdate, seats, lugDesc, src, dst, driver, cno, dbName):
+    conn = sqlite3.connect(dbName)
     c = conn.cursor()
     c.execute('PRAGMA foreign_keys=ON;')
     
@@ -159,8 +178,8 @@ def insertRides(rno, price, rdate, seats, lugDesc, src, dst, driver, cno):
     return
 
 #This function enters enroute information into the ride table
-def insertEnroute(rno, lcode):
-    conn = sqlite3.connect('C:/SQLite/t.db')
+def insertEnroute(rno, lcode, dbName):
+    conn = sqlite3.connect(dbName)
     c = conn.cursor()
     c.execute('PRAGMA foreign_keys=ON;')
     
@@ -177,8 +196,9 @@ def insertEnroute(rno, lcode):
 
 #This is the primary ride offer function. Here members are prompted to insert information about their ride
 #This function calls all of the helper functions associated with ride info
-def rideInfo(email):
-    conn = sqlite3.connect('C:/SQLite/t.db')
+def rideInfo(dbName, email):
+    from menu import mainMenu
+    conn = sqlite3.connect(dbName)
     c = conn.cursor()
     c.execute('PRAGMA foreign_keys=ON;')
 
@@ -186,28 +206,27 @@ def rideInfo(email):
     rdate = dateCheck()
   
 #user inputs info for seats, ppseat, lugagge
-    seats1 = input('How many seats are available?: ')
+    seats1 = int(input('How many seats are available?: '))
     ppseat = input('How much to you charge per seat?: ')
     luggage = input('What luggage can riders bring?: ')
     
 #user keyword is checked against existing lcodes
     print('Please enter your start location as an lcode or keyword.')
-    key1 = '' 
-    src = locationSearch()
+    src = locationSearch(dbName)
     
 #user keyword is checked against existing lcodes
     print('Please enter your end location as an lcode or keyword.')
-    key2 = ''
-    dst = locationSearch()
+    dst = locationSearch(dbName)
     
 #user inputed CNO is checked to ensure car is registered to user 
     cnoAsk = input('Do you have a car number (CNO)? (Y/N) ')
     if cnoAsk.startswith('n' or 'N'):
-        print('Your CNO will be left blank.')
-        cnoAsk = ""
+        print('Your CNO and seats will be left blank.')
+        cnoB = None
+        seats2 = seats1
     elif cnoAsk.startswith('y' or 'Y'):
         cnoA = input('What is your cno?: ')
-        cnoB, seats2 = cnoMatch(cnoA, email)
+        cnoB, seats2 = cnoMatch(cnoA, email, seats1, dbName)
         
 #enroute the locationSearch() function as well
     enrtCheck = input('Do you have any enroute locations? (Y/N)')
@@ -225,7 +244,7 @@ def rideInfo(email):
       
         for x in range(num):
             print('Please input an lcode or a keyword for your enroute location(s): ')
-            enKey = locationSearch()
+            enKey = locationSearch(dbName)
             enrtList.append(enKey)
     elif enrtCheck.startswith('n' or 'N'):
         enroute = False
@@ -234,14 +253,11 @@ def rideInfo(email):
     driver = email    
     
 #rno is automatically set to the next unique number
-    rno = maxRno()
-    print(cnoB)
-    print(seats2)
-    print(src)
-    print(dst)
+    rno = maxRno(dbName)
+    
 #shows the user the info they entered  
     print('Your info is:\n' +
-          'Date = ' + rdate + '; Seats = ',seats2[0][0],'; Price/seat = ' + ppseat
+          'Date = ' + rdate + '; Seats = '+ str(seats2) +'; Price/seat = ' + ppseat
           + '; Luggage = ' + luggage + '; Start of Ride = ' + src + '; End of ride =  ' + dst 
           + '; Car Number = ', cnoB)
 #if user entered enroute locations - show them their list of enroute locations
@@ -249,11 +265,16 @@ def rideInfo(email):
         print('The enroute locations you entered are: ')
         for each in enrtList:
             print (each)
+    else:
+        print('You do not have any enroute locations.')
     
 #insert into rides table
-    insertRides(rno, ppseat, rdate, seats2[0][0], luggage, src, dst, driver, cnoB)
+    insertRides(rno, ppseat, rdate, seats2, luggage, src, dst, driver, cnoB, dbName)
 #insert into enroute table
-    insertEnroute(rno, enrtList)
+    if enroute == True:
+        insertEnroute(rno, enrtList, dbName)
+    else:
+        print('')
     
     conn.commit()
 
@@ -261,4 +282,4 @@ def rideInfo(email):
     mainMenu(dbName, email)
   
   
-  
+
