@@ -149,6 +149,7 @@ def bookMembers(dbName,email):
             {"email": email, "rno": rno})
         rnoMatch = c.fetchone()
 
+        #if rno
         if rnoMatch:
             for x in ridesUnique:
                 if rnoMatch[0] == x[0]:
@@ -269,7 +270,6 @@ def bookMembers(dbName,email):
             print('\nNo Matching Rides')
             bookingMenu(dbName,email)
         
-    
     else:
         print('\nInvalid Input')
         bookMembers(dbName,email)
