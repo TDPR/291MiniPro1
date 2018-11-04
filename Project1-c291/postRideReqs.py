@@ -1,12 +1,7 @@
-'''
-Created on Nov 1, 2018
-
-@author: Mike
-'''
 
 import sqlite3
 import datetime
-conn = sqlite3.connect('C:/SQLite/t.db')
+conn = sqlite3.connect(dbname)
 c = conn.cursor()
 c.execute('PRAGMA foreign_keys=ON;')
 
