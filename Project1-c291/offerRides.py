@@ -134,7 +134,7 @@ def locationSearch(dbName):
                     OR prov LIKE ?
                     OR address LIKE ?
                     GROUP BY lcode
-                    ORDER BY lcode DESC
+                    ORDER BY lcode ASC
                     LIMIT 5 OFFSET ?;
                     ''', [loca3, loca3, loca3, offsetValue])
         results = c.fetchall()
