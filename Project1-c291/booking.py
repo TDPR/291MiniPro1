@@ -172,6 +172,8 @@ def bookMembers(dbName,email):
                 memEmail = ''
                 seatBooked = '0'
                 cost = ''
+                pickUp=''
+                dropOff=''
                 print('\nFill the rest of form: ')
                 while not memEmail:
                     memEmail = input('Email of member you wish to book: ')
@@ -191,7 +193,7 @@ def bookMembers(dbName,email):
                     if seatBooked == '0':
                         print('\nPlease book at least one seat')
                     elif seatBooked.isdigit():
-                        rideMatch[2] = int(rideMatch[2] or 0) + int(seatBooked or 0)
+                        rideMatch[2] = int(rideMatch[2] or 0) + int(seatBooked)
                         if rideMatch[1] - rideMatch[2] < 0:
                             print("You're overbooked by " + str(abs(rideMatch[1] - rideMatch[2])))
                             print('Please Confirm y|n')
@@ -210,8 +212,29 @@ def bookMembers(dbName,email):
                 while not cost.isdigit():
                     cost = input('Enter the cost per seat: ')
 
-                pickUp = input('Enter the pick up location: ')
-                dropOff = input('Enter the drop off location: ')
+                while not pickUp:
+                    pickUp = input('Enter the pick up location code: ')
+                    c.execute('''
+                        SELECT lcode
+                        FROM locations
+                        WHERE lcode LIKE :lcode;''', 
+                        {"lcode": pickUp})
+                    lcode = c.fetchall()
+                    if not lcode:
+                        print('\nLocation Code invalid')
+                        pickUp=''
+
+                while not dropOff:
+                    dropOff = input('Enter the drop off location code: ')
+                    c.execute('''
+                        SELECT lcode
+                        FROM locations
+                        WHERE lcode LIKE :lcode;''', 
+                        {"lcode": dropOff})
+                    lcode = c.fetchall()
+                    if not lcode:
+                        print('\nLocation Code invalid')
+                        dropOff=''
 
                 print('\nConfirm Details for booking')
                 print('RNO: ' + str(rideMatch[0]))
@@ -235,10 +258,6 @@ def bookMembers(dbName,email):
                     bookMsg = [memEmail,datetime.datetime.now().date(),email,
                         'Your driver has booked you to BNO: ' + str(bnoMax), rideMatch[0], 'n']
                     
-                    #was giving a foreign key constraint failed error
-                    #browsing sqlite documentation offered no solution since the rno is referenced
-                    #in the rides table. 
-                    c.execute(' PRAGMA foreign_keys=OFF; ')
                     c.execute('''INSERT 
                         INTO bookings(bno,email,rno,cost,seats,pickup,dropoff)
                         VALUES (?,?,?,?,?,?,?);''',
@@ -249,7 +268,7 @@ def bookMembers(dbName,email):
                         VALUES (?,?,?,?,?,?);''',
                         bookMsg)
 
-                    print("\nYou've succesfully booked " + memEmail + 'to RNO:' + str(rideMatch[0]) + 'with BNO: ' +str(bnoMax))
+                    print("\nYou've succesfully booked " + memEmail + 'to RNO:' + str(rideMatch[0]) + ' with BNO: ' +str(bnoMax))
                     conn.commit()
                     conn.close()
                     bookMembers(dbName,email)
