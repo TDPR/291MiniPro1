@@ -17,3 +17,4 @@ Create Unique Id (1)- https://social.msdn.microsoft.com/Forums/sqlserver/en-US/6
 Create Uniqe Id (2) - https://stackoverflow.com/questions/7604893/sql-select-row-from-table-where-id-maxid/7604926
 Limit & Offset Searches (1): https://www.w3schools.com/python/python_mysql_limit.asp
 Limit & Offset Searches (2): http://www.sqlitetutorial.net/sqlite-limit/
+ 
