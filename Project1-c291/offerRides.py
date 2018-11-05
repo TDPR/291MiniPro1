@@ -55,7 +55,6 @@ def cnoMatch(carNum, email, seats1, dbName):
                 LEFT JOIN  members on owner = email
                 where email =  ?''', [email])
     cnoResult = c.fetchall() 
-    print(cnoResult)
     
     myCno = []
     
