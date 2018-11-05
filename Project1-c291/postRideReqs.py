@@ -88,7 +88,7 @@ def locationSearch(dbName):
         elif check2.lower() == 'next':
             offsetValue = offsetValue + 5
         elif check2.lower() == 'exit':
-            loca = ""
+            loca = None
             False
             break
         elif check2 == 'change':
@@ -124,7 +124,22 @@ def postRideRequest(dbName, email):
     c = conn.cursor()
     c.execute('PRAGMA foreign_keys=ON;')
     
-    print('Welcome to ride requests. Please input information about the ride you are requesting: ')
+#allows user to leave before they start
+    print('Welcome to post ride request.')
+    while(True):
+        cont = input('Type \'y\' to continue or \'n\' to return to main menu. ')
+        if cont.startswith('n' or 'N'):
+            print('Bye Bye.')
+            mainMenu(dbName, email)
+            False
+            break
+        elif cont.startswith('y' or 'Y'):
+            ('Please begin.')
+            False
+            break
+        else:
+            print("Please enter either \'Y\' or \'N\'.")
+
 #will ask for rdate and check to ensure string is date format
     requestDate = dateCheck()
 #produces unique rno
@@ -136,10 +151,18 @@ def postRideRequest(dbName, email):
     print('Where would you like to be dropped off?')
     dropoff = locationSearch(dbName)
 #member provides amount willing to pay
-    amount = input('How much are you willing pay per seat?: ')
+    while(True):
+        try:        
+            amount = int(input('How much are you willing to pay per seat?: '))
+        except ValueError:
+            print ('Please enter amount as a whole number.')
+        else:
+            False
+            break
 #inserts information into requests table
     insertRequest(requestRID, email, requestDate, pickup, dropoff, amount, dbName)
     conn.commit()
     
     mainMenu(dbName, email)
-    
+
+

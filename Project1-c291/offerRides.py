@@ -64,44 +64,47 @@ def cnoMatch(carNum, email, seats1, dbName):
     
     
     if not int(carNum) in myCno:
-        for x in range (0,3):
-            print('The CNO you entered does not match your registered cars. Please try again')
+        while(True):
+            print('The CNO you entered does not match your registered cars. \nPlease try again or type \'exit\' to leave CNO blank')
+            print(cnoResult)
             cnoRecheck = input('What is your CNO? ')
-            if int(cnoRecheck) in myCno:
-                cno = cnoRecheck
+            if cnoRecheck == 'exit':
+                print('CNO will be set to null.')
+                cno = None
+                seatsSend = seats1
                 break
-            elif x == 3:
-                print('You have entered the incorrect CNO 3 times. CNO will be set to null.')
-                cno = ""
+            elif cnoRecheck.isdigit():
+                if int(cnoRecheck) in myCno:
+                    cno = cnoRecheck
+                    break
     else:
         cno = carNum  
-        
-    c.execute('''
-                            SELECT seats
-                            FROM cars
-                            where cno = ? ''',[cno])
-    seatsResult = c.fetchall()
-    print('The correct number of seats in your car is: ', seatsResult[0][0])
-    seatsCheck = seatsResult[0][0]
-    if seats1 < seatsCheck:
-        print('You have ' + str(seatsCheck-seats1) + ' seats still available.')
-        seatsAsk = input('Would you like to adjust the number of seats you are offering? (Y/N):')
-        if seatsAsk.startswith('n' or 'N'):
-            print('Your offered seats will not be adjusted.')
-            seatsSend = seats1
-        elif seatsAsk.startswith('y' or 'Y'):
-            seats1 = int(input('What is your seat number?: '))
-            while seats1 > seatsCheck:
-                print('The value you entered is too high. Please enter a number lower than ' + str(seatsResult[0][0]))
+    if cnoRecheck != 'exit': 
+        c.execute('''
+                                SELECT seats
+                                FROM cars
+                                where cno = ? ''',[cno])
+        seatsResult = c.fetchall()
+        print('The correct number of seats in your car is: ', seatsResult[0][0])
+        seatsCheck = seatsResult[0][0]
+        if seats1 < seatsCheck:
+            print('You have ' + str(seatsCheck-seats1) + ' seats still available.')
+            seatsAsk = input('Would you like to adjust the number of seats you are offering? (Y/N):')
+            if seatsAsk.startswith('n' or 'N'):
+                print('Your offered seats will not be adjusted.')
+                seatsSend = seats1
+            elif seatsAsk.startswith('y' or 'Y'):
                 seats1 = int(input('What is your seat number?: '))
+                while seats1 > seatsCheck:
+                    print('The value you entered is too high. Please enter a number lower than ' + str(seatsResult[0][0]))
+                    seats1 = int(input('What is your seat number?: '))
 
-    elif seats1 > seatsResult[0][0]:
-        while seats1 > seatsCheck:
-            print('You have entered ' + str(seats1) +'. The number of seats you have entered are more than the seats you have.')
-            seats1 = int(input('Please input a value less than or equal to ' + str(seatsResult[0][0]) + ': '))
-  
-    seatsSend = seats1
-    #cnoB, seatsSend = cnoMatch(cnoA, email, seats1)
+        elif seats1 > seatsResult[0][0]:
+            while seats1 > seatsCheck:
+                print('You have entered ' + str(seats1) +'. The number of seats you have entered are more than the seats you have.')
+                seats1 = int(input('Please input a value less than or equal to ' + str(seatsResult[0][0]) + ': '))
+    
+        seatsSend = seats1
 
     return cno, seatsSend
 
@@ -149,7 +152,7 @@ def locationSearch(dbName):
         elif check2.lower() == 'next':
             offsetValue = offsetValue + 5
         elif check2.lower() == 'exit':
-            loca = ""
+            loca = None
             False
             break
         elif check2 == 'change':
@@ -202,12 +205,44 @@ def rideInfo(dbName, email):
     c = conn.cursor()
     c.execute('PRAGMA foreign_keys=ON;')
 
-    
+#allows user to leave before they start
+    print('Welcome to offer rides.')
+    while(True):
+        cont = input('Type \'y\' to continue or \'n\' to return to main menu. ')
+        if cont.startswith('n' or 'N'):
+            print('Bye Bye.')
+            mainMenu(dbName, email)
+            False
+            break
+        elif cont.startswith('y' or 'Y'):
+            ('Please begin.')
+            False
+            break
+        else:
+            print("Please enter either \'Y\' or \'N\'.")
+
+#accepts user input for date and checks that it is correct
     rdate = dateCheck()
   
 #user inputs info for seats, ppseat, lugagge
-    seats1 = int(input('How many seats are available?: '))
-    ppseat = input('How much to you charge per seat?: ')
+    while(True):
+        try:
+            seats1 = int(input('How many seats are available?: '))
+        except ValueError:
+            print('Please enter a whole number (integer).')
+        else:
+            False 
+            break
+
+    while(True):
+        try:        
+            ppseat = int(input('How much will you charge per seat?: '))
+        except ValueError:
+            print ('Please enter amount as a whole number.')
+        else:
+            False
+            break
+    
     luggage = input('What luggage can riders bring?: ')
     
 #user keyword is checked against existing lcodes
@@ -219,35 +254,51 @@ def rideInfo(dbName, email):
     dst = locationSearch(dbName)
     
 #user inputed CNO is checked to ensure car is registered to user 
-    cnoAsk = input('Do you have a car number (CNO)? (Y/N) ')
-    if cnoAsk.startswith('n' or 'N'):
-        print('Your CNO and seats will be left blank.')
-        cnoB = None
-        seats2 = seats1
-    elif cnoAsk.startswith('y' or 'Y'):
-        cnoA = input('What is your cno?: ')
-        cnoB, seats2 = cnoMatch(cnoA, email, seats1, dbName)
+    while(True):
+        cnoAsk = input('Do you have a car number (CNO)? (Y/N) ')
+        if cnoAsk.startswith('n' or 'N'):
+            print('Your CNO and seats will be left blank.')
+            #cnoB = None
+            cnoB = None
+            seats2 = seats1
+            False
+            break
+        elif cnoAsk.startswith('y' or 'Y'):
+            cnoA = input('What is your cno?: ')
+            cnoB, seats2 = cnoMatch(cnoA, email, seats1, dbName)
+            False
+            break
+        else:
+            print("Please enter either \'Y\' or \'N\'.")
         
 #enroute the locationSearch() function as well
     enrtCheck = input('Do you have any enroute locations? (Y/N)')
-    if enrtCheck.startswith('y' or 'Y'):
-        enroute = True
-        enrtList = []
-        while True:
-            try:
-                num = int(input('Enter the number of enroute locations you plan to have: '))
-            except ValueError:
-                print('Please enter the number of your locations as an integer.')
-                continue
-            else:
-                break
-      
-        for x in range(num):
-            print('Please input an lcode or a keyword for your enroute location(s): ')
-            enKey = locationSearch(dbName)
-            enrtList.append(enKey)
-    elif enrtCheck.startswith('n' or 'N'):
-        enroute = False
+    while (True):
+        if enrtCheck.startswith('y' or 'Y'):
+            enroute = True
+            enrtList = []
+            while True:
+                try:
+                    num = int(input('Enter the number of enroute locations you plan to have: '))
+                except ValueError:
+                    print('Please enter the number of your locations as an integer.')
+                    continue
+                else:
+                    break
+        
+            for x in range(num):
+                print('Please input an lcode or a keyword for your enroute location(s): ')
+                enKey = locationSearch(dbName)
+                enrtList.append(enKey)
+            False
+            break
+        elif enrtCheck.startswith('n' or 'N'):
+            enroute = False
+            False
+            break
+        else:
+            print("Please enter either \'Y\' or \'N\'.")
+
     
 #driver is automatically set to member email
     driver = email    
@@ -255,11 +306,8 @@ def rideInfo(dbName, email):
 #rno is automatically set to the next unique number
     rno = maxRno(dbName)
     
-#shows the user the info they entered  
-    print('Your info is:\n' +
-          'Date = ' + rdate + '; Seats = '+ str(seats2) +'; Price/seat = ' + ppseat
-          + '; Luggage = ' + luggage + '; Start of Ride = ' + src + '; End of ride =  ' + dst 
-          + '; Car Number = ', cnoB)
+#verifies the user has entered info
+    print('Your ride info has been recorded')
 #if user entered enroute locations - show them their list of enroute locations
     if enroute == True:
         print('The enroute locations you entered are: ')
@@ -280,6 +328,7 @@ def rideInfo(dbName, email):
 
 
     mainMenu(dbName, email)
-  
+
+
   
 
