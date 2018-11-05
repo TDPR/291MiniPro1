@@ -95,7 +95,7 @@ def cnoMatch(carNum, email, seats1, dbName):
             elif seatsAsk.startswith('y' or 'Y'):
                 seats1 = int(input('What is your seat number?: '))
                 while seats1 > seatsCheck:
-                    print('The value you entered is too high. Please enter a number lower than ' + str(seatsResult[0][0]))
+                    print('\nThe value you entered is too high. Please enter a number lower than ' + str(seatsResult[0][0]))
                     seats1 = int(input('What is your seat number?: '))
 
         elif seats1 > seatsResult[0][0]:
@@ -228,7 +228,7 @@ def rideInfo(dbName, email):
         try:
             seats1 = int(input('How many seats are available?: '))
         except ValueError:
-            print('Please enter a whole number (integer).')
+            print('\nPlease enter a whole number (integer).')
         else:
             False 
             break
@@ -237,7 +237,7 @@ def rideInfo(dbName, email):
         try:        
             ppseat = int(input('How much will you charge per seat?: '))
         except ValueError:
-            print ('Please enter amount as a whole number.')
+            print ('\nPlease enter amount as a whole number.')
         else:
             False
             break

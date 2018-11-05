@@ -10,7 +10,7 @@ def dateCheck():
         if (len(rdate.split('-')) < 3 or len(rdate.split('-')) > 3):
             if x == 2:
                 print('The you have entered the wrong date 3 times. Ride Date will be left blank.' )  
-            print('The date that you entered is incorrect. Please try again')
+            print('\nThe date that you entered is incorrect. Please try again')
             print('You have ' + str(2-x) +' tries available. Or it will be left blank')
         else:
             try:
@@ -86,7 +86,7 @@ def locationSearch(dbName):
             loca3 = input('What is your keyword?: ')
             
         else:
-            print('Your choice is invalid.')
+            print('\nYour choice is invalid.')
      
     return loca
 
@@ -146,7 +146,7 @@ def postRideRequest(dbName, email):
         try:        
             amount = int(input('How much are you willing to pay per seat?: '))
         except ValueError:
-            print ('Please enter amount as a whole number.')
+            print ('\nPlease enter amount as a whole number.')
         else:
             False
             break
