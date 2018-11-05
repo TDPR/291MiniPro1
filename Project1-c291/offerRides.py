@@ -90,15 +90,24 @@ def cnoMatch(carNum, email, seats1, dbName):
             print('Your offered seats will not be adjusted.')
             seatsSend = seats1
         elif seatsAsk.startswith('y' or 'Y'):
-            seats1 = int(input('What is your seat number?: '))
+            seats1 = ''
+            while not seats1.isdigit():
+                seats1 = input('What is your seat number?: ')
+            seats1 = int(seats1)
             while seats1 > seatsCheck:
                 print('The value you entered is too high. Please enter a number lower than ' + str(seatsResult[0][0]))
-                seats1 = int(input('What is your seat number?: '))
+                seats1 = ''
+                while not seats1.isdigit():
+                    seats1 = input('What is your seat number?: ')
+                seats1 = int(seats1)
 
     elif seats1 > seatsResult[0][0]:
         while seats1 > seatsCheck:
             print('You have entered ' + str(seats1) +'. The number of seats you have entered are more than the seats you have.')
-            seats1 = int(input('Please input a value less than or equal to ' + str(seatsResult[0][0]) + ': '))
+            seats1 = ''
+            while not seats1.isdigit():
+                seats1 = input('Please input a value less than or equal to ' + str(seatsResult[0][0]) + ': ')
+            seats1 = int(seats1)
   
     seatsSend = seats1
     #cnoB, seatsSend = cnoMatch(cnoA, email, seats1)
@@ -140,7 +149,8 @@ def locationSearch(dbName):
         for each in results:
             print(each)
             
-        check2 = input('If you see the correct lcode please enter it. If not, type "next", or type "exit" to leave blank.\n**(If you entered incorrectly type "change" to view new queries.)** \n ')
+        check2 = input('''If you see the correct lcode please enter it. If not, type "next", or type "exit" to leave blank.\n
+                        **(If you entered incorrectly type "change" to view new queries.)** \n ''')
     
         if (check2,) in lcodeList:
             loca = check2
@@ -205,20 +215,23 @@ def rideInfo(dbName, email):
     
     rdate = dateCheck()
   
-#user inputs info for seats, ppseat, lugagge
-    seats1 = int(input('How many seats are available?: '))
+    #user inputs info for seats, ppseat, lugagge
+    seats1=''
+    while not seats1.isdigit():
+        seats1 = input('How many seats are available?: ')
+    seats1 = int(seats1)
     ppseat = input('How much to you charge per seat?: ')
     luggage = input('What luggage can riders bring?: ')
     
-#user keyword is checked against existing lcodes
+    #user keyword is checked against existing lcodes
     print('Please enter your start location as an lcode or keyword.')
     src = locationSearch(dbName)
     
-#user keyword is checked against existing lcodes
+    #user keyword is checked against existing lcodes
     print('Please enter your end location as an lcode or keyword.')
     dst = locationSearch(dbName)
     
-#user inputed CNO is checked to ensure car is registered to user 
+    #user inputed CNO is checked to ensure car is registered to user 
     cnoAsk = input('Do you have a car number (CNO)? (Y/N) ')
     if cnoAsk.startswith('n' or 'N'):
         print('Your CNO and seats will be left blank.')
@@ -228,7 +241,7 @@ def rideInfo(dbName, email):
         cnoA = input('What is your cno?: ')
         cnoB, seats2 = cnoMatch(cnoA, email, seats1, dbName)
         
-#enroute the locationSearch() function as well
+    #enroute the locationSearch() function as well
     enrtCheck = input('Do you have any enroute locations? (Y/N)')
     if enrtCheck.startswith('y' or 'Y'):
         enroute = True
@@ -249,18 +262,18 @@ def rideInfo(dbName, email):
     elif enrtCheck.startswith('n' or 'N'):
         enroute = False
     
-#driver is automatically set to member email
+    #driver is automatically set to member email
     driver = email    
     
-#rno is automatically set to the next unique number
+    #rno is automatically set to the next unique number
     rno = maxRno(dbName)
     
-#shows the user the info they entered  
+    #shows the user the info they entered  
     print('Your info is:\n' +
           'Date = ' + rdate + '; Seats = '+ str(seats2) +'; Price/seat = ' + ppseat
           + '; Luggage = ' + luggage + '; Start of Ride = ' + src + '; End of ride =  ' + dst 
           + '; Car Number = ', cnoB)
-#if user entered enroute locations - show them their list of enroute locations
+    #if user entered enroute locations - show them their list of enroute locations
     if enroute == True:
         print('The enroute locations you entered are: ')
         for each in enrtList:
@@ -268,9 +281,9 @@ def rideInfo(dbName, email):
     else:
         print('You do not have any enroute locations.')
     
-#insert into rides table
+    #insert into rides table
     insertRides(rno, ppseat, rdate, seats2, luggage, src, dst, driver, cnoB, dbName)
-#insert into enroute table
+    #insert into enroute table
     if enroute == True:
         insertEnroute(rno, enrtList, dbName)
     else:

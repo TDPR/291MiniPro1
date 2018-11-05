@@ -13,12 +13,12 @@ def mainMenu(dbName, email):
     res = input()
 
     if res == '1':
-        print('Offer a ride')
+        print('\nOffer a ride')
         from offerRides import rideInfo
         rideInfo(dbName, email)
 
     elif res == '2':
-        print('Search rides')
+        print('\nSearch rides')
         from searchRides import searchRides
         searchRides(dbName, email)
 
@@ -28,22 +28,22 @@ def mainMenu(dbName, email):
         bookingMenu(dbName, email)
         
     elif res == '4':
-        print ('Post a ride request')
+        print ('\nPost a ride request')
         from postRideReqs import postRideRequest
         postRideRequest(dbName, email)
     
     elif res == '5':
-        print('Delete and search requests')
+        print('\nDelete and search requests')
         from searchRequests import deleteOrSearchRequests
         deleteOrSearchRequests(dbName, email)
 
     elif res == '6':
-        print('Logging Out')
+        print('\nLogging Out')
         from login import loginMenu
         loginMenu(dbName)
 
     else:
-        print('Invalid Input')
+        print('\nInvalid Input')
         mainMenu(dbName, email)
 
 def getMessages(dbName, email):

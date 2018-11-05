@@ -1,9 +1,3 @@
-'''
-Created on Nov 1, 2018
-
-@author: Mike
-'''
-
 import sqlite3
 import datetime
 
@@ -42,9 +36,6 @@ def maxRID(dbName):
     
     return rid
 
-'''
-NOTE** location search is the same as the one in offer rides (you only need one for integration)
-'''
 def locationSearch(dbName):
     conn = sqlite3.connect(dbName)
     c = conn.cursor()
@@ -78,7 +69,8 @@ def locationSearch(dbName):
         for each in results:
             print(each)
             
-        check2 = input('If you see the correct lcode please enter it. If not, type "next", or type "exit" to leave blank.\n**(If you entered incorrectly type "change" to view new queries.)** \n ')
+        check2 = input('''If you see the correct lcode please enter it. If not, type "next", or type "exit" to leave blank.\n
+                        **(If you entered incorrectly type "change" to view new queries.)** \n ''')
         
         if (check2,) in lcodeList:
             loca = check2
@@ -125,19 +117,19 @@ def postRideRequest(dbName, email):
     c.execute('PRAGMA foreign_keys=ON;')
     
     print('Welcome to ride requests. Please input information about the ride you are requesting: ')
-#will ask for rdate and check to ensure string is date format
+    #will ask for rdate and check to ensure string is date format
     requestDate = dateCheck()
-#produces unique rno
+    #produces unique rno
     requestRID = maxRID(dbName)
-#finds pick up location using locationSearch func.
+    #finds pick up location using locationSearch func.
     print('Where would you like to be picked up?')
     pickup = locationSearch(dbName)
-#finds dropoff location using locationSearch func.
+    #finds dropoff location using locationSearch func.
     print('Where would you like to be dropped off?')
     dropoff = locationSearch(dbName)
-#member provides amount willing to pay
+    #member provides amount willing to pay
     amount = input('How much are you willing pay per seat?: ')
-#inserts information into requests table
+    #inserts information into requests table
     insertRequest(requestRID, email, requestDate, pickup, dropoff, amount, dbName)
     conn.commit()
     
