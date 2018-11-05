@@ -115,8 +115,7 @@ def postRideRequest(dbName, email):
     c = conn.cursor()
     c.execute('PRAGMA foreign_keys=ON;')
     
-<<<<<<< HEAD
-#allows user to leave before they start
+    #allows user to leave before they start
     print('Welcome to post ride request.')
     while(True):
         cont = input('Type \'y\' to continue or \'n\' to return to main menu. ')
@@ -132,11 +131,7 @@ def postRideRequest(dbName, email):
         else:
             print("Please enter either \'Y\' or \'N\'.")
 
-#will ask for rdate and check to ensure string is date format
-=======
-    print('Welcome to ride requests. Please input information about the ride you are requesting: ')
     #will ask for rdate and check to ensure string is date format
->>>>>>> 3b1e793b543f96aacd5d90de2fd54fe5c32aa708
     requestDate = dateCheck()
     #produces unique rno
     requestRID = maxRID(dbName)
@@ -146,8 +141,7 @@ def postRideRequest(dbName, email):
     #finds dropoff location using locationSearch func.
     print('Where would you like to be dropped off?')
     dropoff = locationSearch(dbName)
-<<<<<<< HEAD
-#member provides amount willing to pay
+    #member provides amount willing to pay
     while(True):
         try:        
             amount = int(input('How much are you willing to pay per seat?: '))
@@ -156,12 +150,7 @@ def postRideRequest(dbName, email):
         else:
             False
             break
-#inserts information into requests table
-=======
-    #member provides amount willing to pay
-    amount = input('How much are you willing pay per seat?: ')
     #inserts information into requests table
->>>>>>> 3b1e793b543f96aacd5d90de2fd54fe5c32aa708
     insertRequest(requestRID, email, requestDate, pickup, dropoff, amount, dbName)
     conn.commit()
     
