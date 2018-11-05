@@ -191,7 +191,7 @@ def bookMembers(dbName,email):
                     if seatBooked == '0':
                         print('\nPlease book at least one seat')
                     elif seatBooked.isdigit():
-                        rideMatch[2] += int(seatBooked)
+                        rideMatch[2] = int(rideMatch[2] or 0) + int(seatBooked or 0)
                         if rideMatch[1] - rideMatch[2] < 0:
                             print("You're overbooked by " + str(abs(rideMatch[1] - rideMatch[2])))
                             print('Please Confirm y|n')

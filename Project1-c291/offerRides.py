@@ -149,8 +149,7 @@ def locationSearch(dbName):
         for each in results:
             print(each)
             
-        check2 = input('''If you see the correct lcode please enter it. If not, type "next", or type "exit" to leave blank.\n
-                        **(If you entered incorrectly type "change" to view new queries.)** \n ''')
+        check2 = input('''If you see the correct lcode please enter it. \nIf not, type "next", or type "exit" to leave blank.\n**(If you entered incorrectly type "change" to view new queries.)** \n ''')
     
         if (check2,) in lcodeList:
             loca = check2
