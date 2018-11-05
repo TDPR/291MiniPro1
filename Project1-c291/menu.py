@@ -17,6 +17,11 @@ def mainMenu(dbName, email):
         from offerRides import rideInfo
         rideInfo(dbName, email)
 
+    elif res == '2':
+        print('Search rides')
+        from searchRides import searchRides
+        searchRides(dbName, email)
+
     elif res == '3':
         print('\nBooking Menu')
         from booking import bookingMenu
@@ -26,7 +31,12 @@ def mainMenu(dbName, email):
         print ('Post a ride request')
         from postRideReqs import postRideRequest
         postRideRequest(dbName, email)
-        
+    
+    elif res == '5':
+        print('Delete and search requests')
+        from searchRequests import deleteOrSearchRequests
+        deleteOrSearchRequests(dbName, email)
+
     elif res == '6':
         print('Logging Out')
         from login import loginMenu
