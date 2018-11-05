@@ -22,6 +22,8 @@ def messageMember(dbName, email, rEmail, rno):
     else:
         c.execute("""INSERT INTO inbox(email, msgTimestamp, sender, content, rno, seen) 
         VALUES (?, DATETIME('now'), ?, ?, ?, 'n');""",[rEmail, email, inp, rno])
+        conn.commit()
+        conn.close()
         print('Message sent')
         return
 
@@ -51,6 +53,7 @@ def searchRides(dbName, email):
         print('(type !esc to return to main menu)')
         inp = input()
         if inp == '!esc':
+            conn.close()
             menu.mainMenu(dbName, email) # returns to main menu
         keys = [i for i in inp.split()]
         keys = ['%'+k+'%' for k in keys]
@@ -87,9 +90,11 @@ def searchRides(dbName, email):
                             else: 
                                 print('You cannot go back any more.')
                         elif inp == '!esc':
+                            conn.close()
                             menu.mainMenu(dbName, email)
                         else:
                             messageMember(dbName, email, rows[inp][7], rows[inp][0])
+                            conn.close()
                             menu.mainMenu(dbName, email) # back to main menu
                     else:
                         print('There were no locations with keyword {key}'.format(key=keys[0]))
@@ -141,9 +146,11 @@ def searchRides(dbName, email):
                             else: 
                                 print('You cannot go back any more.')
                         elif inp == '!esc':
+                            conn.close()
                             menu.mainMenu(dbName, email)
                         elif type(inp)== int:
                             messageMember(dbName, email, rows[inp][7], rows[inp][0])
+                            conn.close()
                             menu.mainMenu(dbName, email)
                         else:
                             print('Something was wrong with your input')
@@ -215,9 +222,11 @@ def searchRides(dbName, email):
                             else: 
                                 print('You cannot go back any more.')
                         elif inp == '!esc':
+                            conn.close()
                             menu.mainMenu(dbName, email)
                         else:
                             messageMember(dbName, email, rows[inp][7], rows[inp][0])
+                            conn.close()
                             menu.mainMenu(dbName, email) # back to main menu
                     else:
                         print('There were no locations with keywords {key1}, {key2}, {key3}'.format(key1=keys[0], key2=keys[1], key3=keys[2]))

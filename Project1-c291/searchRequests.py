@@ -68,6 +68,8 @@ def messageMemberRequest(dbName, email, reciever):
                 else:
                     c.execute("""INSERT INTO inbox(email, msgTimestamp, sender, content, rno, seen) 
                     VALUES (?, DATETIME('now'), ?, ?, ?, 'n');""", (reciever, email, inp, rno))
+                    conn.commit()
+                    conn.close()
                     print('Message sent')
                     return
         else:
@@ -84,6 +86,7 @@ def deleteOrSearchRequests(dbName, email):
         print('(type !esc to return to main menu)')
         inp = input()
         if inp == '!esc':
+            conn.close()
             menu.mainMenu(dbName, email)
         elif inp == '1':
             c.execute("""SELECT r.rid, r.email, r.rdate, r.pickup,
@@ -97,12 +100,15 @@ def deleteOrSearchRequests(dbName, email):
                 print('(type !esc to go back to main menu)')
                 inp = input()
                 if inp == '!esc':
+                    conn.close() 
                     menu.mainMenu(dbName, email)
                 elif int(inp) in range(0, (len(rows))): #user entered a valid integer
                     print('Are you sure you want to delete the request? y or n')
                     check = input()
                     if check == 'y':
-                        c.execute('DELETE FROM requests WHERE requests.id=?', (rows[int(inp)-1][0]))
+                        c.execute('DELETE FROM requests WHERE rid=?', [rows[int(inp)][0]])
+                        conn.commit()
+                        conn.close()
                         print('Ride Deleted')
                         menu.mainMenu(dbName, email)
                     # if the user doesn't want to delete their request, we just let the while loop iterate again
@@ -111,21 +117,21 @@ def deleteOrSearchRequests(dbName, email):
 
         elif inp == '2':
             offset = 0
-            while True:
-                print('Enter a location code or city name')
-                print('(type !esc to exit to main menu)')
-                inp = input()
-                if inp == '!esc':
-                    menu.mainMenu(dbName, email)
-                inp = '%'+inp+'%'
+            print('Enter a location code or city name')
+            print('(type !esc to exit to main menu)')
+            inp = input()
+            if inp == '!esc':
+                menu.mainMenu(dbName, email)
+            search = True
+            while search:
                 c.execute("""SELECT r.rid, r.email, r.rdate, r.pickup,
-                r.dropoff, r.amount 
-                FROM requests r, 
-                (SELECT lcode FROM locations 
-                WHERE (lcode LIKE ?
-                OR city LIKE ?))
-                WHERE lcode = r.pickup
-                LIMIT 5 OFFSET ?""", [inp, inp, offset])
+                    r.dropoff, r.amount 
+                    FROM requests r, 
+                    (SELECT lcode FROM locations 
+                    WHERE (lcode LIKE ?
+                    OR city LIKE ?))
+                    WHERE lcode = r.pickup
+                    LIMIT 5 OFFSET ?""", ['%'+inp+'%', '%'+inp+'%', offset])
                 rows = c.fetchall()
                 if len(rows) > 0:
                     printRequests(rows)
@@ -138,11 +144,13 @@ def deleteOrSearchRequests(dbName, email):
                         else:
                             print('You cannot go back anymore')
                     elif inp == '!esc':
-                            menu.mainMenu(dbName,email)
+                                menu.mainMenu(dbName,email)
                     else:
                         messageMemberRequest(dbName, email, rows[inp][1])
+                        conn.close()
                         menu.mainMenu(dbName, email)
                 else:
-                    print('There were no location codes or city names matching {key}, '.format(key=inp))
+                    search = False
+                    print('There were no location codes or city names matching {key}\n or there are no more requests for {key}.'.format(key=inp))
         else:
             print('There was something wrong with your input')

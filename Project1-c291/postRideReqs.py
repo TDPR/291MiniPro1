@@ -1,9 +1,3 @@
-'''
-Created on Nov 1, 2018
-
-@author: Mike
-'''
-
 import sqlite3
 import datetime
 
@@ -42,9 +36,6 @@ def maxRID(dbName):
     
     return rid
 
-'''
-NOTE** location search is the same as the one in offer rides (you only need one for integration)
-'''
 def locationSearch(dbName):
     conn = sqlite3.connect(dbName)
     c = conn.cursor()
@@ -78,7 +69,7 @@ def locationSearch(dbName):
         for each in results:
             print(each)
             
-        check2 = input('If you see the correct lcode please enter it. If not, type "next", or type "exit" to leave blank.\n**(If you entered incorrectly type "change" to view new queries.)** \n ')
+        check2 = input('''If you see the correct lcode please enter it. \nIf not, type "next", or type "exit" to leave blank.\n**(If you entered incorrectly type "change" to view new queries.)** \n ''')
         
         if (check2,) in lcodeList:
             loca = check2
@@ -124,6 +115,7 @@ def postRideRequest(dbName, email):
     c = conn.cursor()
     c.execute('PRAGMA foreign_keys=ON;')
     
+<<<<<<< HEAD
 #allows user to leave before they start
     print('Welcome to post ride request.')
     while(True):
@@ -141,15 +133,20 @@ def postRideRequest(dbName, email):
             print("Please enter either \'Y\' or \'N\'.")
 
 #will ask for rdate and check to ensure string is date format
+=======
+    print('Welcome to ride requests. Please input information about the ride you are requesting: ')
+    #will ask for rdate and check to ensure string is date format
+>>>>>>> 3b1e793b543f96aacd5d90de2fd54fe5c32aa708
     requestDate = dateCheck()
-#produces unique rno
+    #produces unique rno
     requestRID = maxRID(dbName)
-#finds pick up location using locationSearch func.
+    #finds pick up location using locationSearch func.
     print('Where would you like to be picked up?')
     pickup = locationSearch(dbName)
-#finds dropoff location using locationSearch func.
+    #finds dropoff location using locationSearch func.
     print('Where would you like to be dropped off?')
     dropoff = locationSearch(dbName)
+<<<<<<< HEAD
 #member provides amount willing to pay
     while(True):
         try:        
@@ -160,6 +157,11 @@ def postRideRequest(dbName, email):
             False
             break
 #inserts information into requests table
+=======
+    #member provides amount willing to pay
+    amount = input('How much are you willing pay per seat?: ')
+    #inserts information into requests table
+>>>>>>> 3b1e793b543f96aacd5d90de2fd54fe5c32aa708
     insertRequest(requestRID, email, requestDate, pickup, dropoff, amount, dbName)
     conn.commit()
     
