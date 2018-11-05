@@ -136,7 +136,7 @@ def bookMembers(dbName,email):
     elif rno.lower() == 'back':
         bookingMenu(dbName,email)
 
-    #booking member logic
+    #rno entered
     elif rno.isdigit():
         conn = sqlite3.connect(dbName)
         c = conn.cursor()
@@ -149,7 +149,7 @@ def bookMembers(dbName,email):
             {"email": email, "rno": rno})
         rnoMatch = c.fetchone()
 
-        #if rno
+        #if you have the specified ride
         if rnoMatch:
             for x in ridesUnique:
                 if rnoMatch[0] == x[0]:
@@ -167,14 +167,15 @@ def bookMembers(dbName,email):
             while res.lower() != 'y' and res.lower() != 'n':
                 res=input()
 
-            #form fill
+            #form fill for booking
             if res.lower() == 'y':
                 memEmail = ''
-                seatBooked = '0'
+                seatBooked = ''
                 cost = ''
                 pickUp=''
                 dropOff=''
                 print('\nFill the rest of form: ')
+                
                 while not memEmail:
                     memEmail = input('Email of member you wish to book: ')
                     c.execute('''
@@ -187,13 +188,16 @@ def bookMembers(dbName,email):
                         print('\nNo nember with that email exists')
                         memEmail=''
                 
-                while seatBooked == '0':
+                while not seatBooked:
                     seatBooked = input('Please enter how many seats you wish to book: ')
-                    
+
                     if seatBooked == '0':
                         print('\nPlease book at least one seat')
+                        seatBooked=''
                     elif seatBooked.isdigit():
                         rideMatch[2] = int(rideMatch[2] or 0) + int(seatBooked)
+                        
+                        #Overbooking
                         if rideMatch[1] - rideMatch[2] < 0:
                             print("You're overbooked by " + str(abs(rideMatch[1] - rideMatch[2])))
                             print('Please Confirm y|n')
@@ -204,10 +208,10 @@ def bookMembers(dbName,email):
 
                             if res.lower() == 'n':
                                 rideMatch[2] -= int(seatBooked)
-                                seatBooked = '0'
+                                seatBooked = ''
                     else:
                         print('\nPlease Enter a number')
-                        seatBooked = '0'
+                        seatBooked = ''
                 
                 while not cost.isdigit():
                     cost = input('Enter the cost per seat: ')
@@ -272,17 +276,19 @@ def bookMembers(dbName,email):
                     conn.commit()
                     conn.close()
                     bookMembers(dbName,email)
-
+                #cancel booking
                 else:
                     conn.commit()
                     conn.close()
                     bookMembers(dbName,email)
-
+            
+            #cancel form fill
             else:
                 conn.commit()
                 conn.close()
                 bookMembers(dbName,email)
-
+        
+        #no ride under user email
         else:
             conn.commit()
             conn.close()
